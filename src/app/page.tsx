@@ -1,51 +1,43 @@
-/**
- * page.tsx - TODOアプリのメインページ
- *
- * Next.jsのApp Routerにおけるページファイル：
- * - src/app/page.tsx は ルート（/）のページを表す
- * - このファイルがブラウザでアクセスした時に最初に表示される
- * - Next.jsは自動的にこのファイルをルートとして認識する
- *
- * このファイルで学べる概念：
- * - 'use client' ディレクティブ
- * - カスタムフックの使用
- * - コンポーネントの組み合わせ
- * -状態管理と表示の分離
- */
+"use client";
 
-"use client"; // Next.jsのクライアントコンポーネントとして動作させるためのディレクティブ
+import { useState } from "react";
+import { Todo } from "@/types/todo";
+import TodoInput from "@/components/TodoInput";
+import TodoList from "@/components/TodoList";
+import TodoStats from "@/components/TodoStats";
 
-// 必要なモジュールをインポート
-import { useTodos } from "@/hooks/useTodos"; // 自作のカスタムフック
-import TodoInput from "@/components/TodoInput"; // 入力コンポーネント
-import TodoList from "@/components/TodoList"; // リスト表示コンポーネント
-import TodoStats from "@/components/TodoStats"; // 統計情報コンポーネント
-
-/**
- * メインページコンポーネント
- *
- * このコンポーネントの役割：
- * - アプリケーション全体のレイアウトを定義
- * - 各子コンポーネントを組み合わせて完全なTODOアプリを構成
- * - カスタムフックから状態と関数を取得
- * - 各子コンポーネントに適切なpropsを渡す
- */
 export default function Home() {
-  // カスタムフック（useTodos）から状態と操作関数を取得
-  // 分割代入（デストラクチャリング）を使用して必要な値を取り出す
-  const { todos, addTodo, toggleTodo, deleteTodo, stats } = useTodos();
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-  // JSXを返す（アプリの見た目を定義）
+  const addTodo = (text: string) => {
+    if (text.trim() === "") return;
+
+    const newTodo: Todo = {
+      id: Date.now(),
+      text: text.trim(),
+      completed: false,
+    };
+
+    setTodos((prevTodos) => [...prevTodos, newTodo]);
+  };
+
+  const toggleTodo = (id: number) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  const deleteTodo = (id: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+  };
+
+  const totalTodos = todos.length;
+  const remainingTodos = todos.filter((todo) => !todo.completed).length;
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* 
-        ヘッダー部分
-        
-        iOS風のシンプルなヘッダーデザイン：
-        - 白い背景
-        - 下部に薄いグレーの境界線
-        - 中央に大きなタイトル
-      */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-md mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-black text-center">
@@ -54,57 +46,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 
-        メインコンテンツエリア
-        
-        デザインのポイント：
-        - 中央寄せで最大幅を制限（max-w-md）
-        - 白い背景のカード風デザイン
-        - 角丸（rounded-xl）と影（shadow-sm）
-        - overflow-hiddenで角丸の内側をクリップ
-      */}
       <div className="max-w-md mx-auto bg-white mt-8 rounded-xl shadow-sm overflow-hidden">
-        {/* 
-          新しいリマインダー追加エリア
-          
-          TodoInputコンポーネントに以下を渡す：
-          - onAddTodo: TODOを追加するための関数
-        */}
         <TodoInput onAddTodo={addTodo} />
-
-        {/* 
-          TODOリスト表示エリア
-          
-          TodoListコンポーネントに以下を渡す：
-          - todos: 現在のTODOリスト（配列）
-          - onToggleTodo: 完了状態を切り替える関数
-          - onDeleteTodo: TODOを削除する関数
-        */}
         <TodoList
           todos={todos}
           onToggleTodo={toggleTodo}
           onDeleteTodo={deleteTodo}
         />
-
-        {/* 
-          統計情報表示エリア
-          
-          TodoStatsコンポーネントに以下を渡す：
-          - remaining: 未完了のTODO数
-          - total: 全体のTODO数
-          
-          注意：statsオブジェクトから必要な値を取り出して渡している
-        */}
-        <TodoStats remaining={stats.remaining} total={stats.total} />
+        <TodoStats remaining={remainingTodos} total={totalTodos} />
       </div>
 
-      {/* 
-        下部の余白
-        
-        ページの最下部に余白を追加：
-        - スクロール時の見た目を改善
-        - モバイルでの操作しやすさを向上
-      */}
       <div className="h-20"></div>
     </div>
   );
@@ -113,33 +64,36 @@ export default function Home() {
 /**
  * このページコンポーネントのポイント：
  *
- * 1. App Routerの活用
- *    - Next.js 13+の新しいルーティングシステム
- *    - ファイルベースルーティング
- *    - page.tsxが自動的にルートページになる
+ * 1. useState による状態管理
+ *    - todos: TODOリストの状態を管理
+ *    - 状態が変更されると自動的にUIが更新される
+ *    - Reactの基本的な状態管理パターン
  *
- * 2. 'use client' ディレクティブ
- *    - このコンポーネントがブラウザで実行されることを指定
- *    - useState、useEffectなどのReactフックを使用する場合に必要
- *    - サーバーサイドレンダリングとクライアントサイドレンダリングの制御
+ * 2. イベント処理関数
+ *    - addTodo: 新しいTODOを追加
+ *    - toggleTodo: 完了状態の切り替え
+ *    - deleteTodo: TODOの削除
+ *    - 各関数が明確な責任を持つ
  *
- * 3. カスタムフックの活用
- *    - ビジネスロジックを分離
- *    - UIコンポーネントをシンプルに保つ
- *    - 再利用性とテスタビリティの向上
+ * 3. 配列操作の基本
+ *    - map: 配列の変換（状態更新）
+ *    - filter: 配列の絞り込み（削除、統計計算）
+ *    - スプレッド演算子: 配列への要素追加
  *
- * 4. コンポーネント合成パターン
- *    - 小さなコンポーネントを組み合わせて大きな機能を作る
- *    - 単一責任の原則に従った設計
- *    - メンテナンス性とデバッグの容易さ
+ * 4. プロップスによるデータの受け渡し
+ *    - 親コンポーネント（このファイル）が状態を管理
+ *    - 子コンポーネントには表示用のデータと操作用の関数を渡す
+ *    - データの流れが分かりやすい
  *
- * 5. プロップスの受け渡し
- *    - 親コンポーネントから子コンポーネントへのデータの流れ
- *    - 関数をpropsとして渡すことでイベント処理を実現
- *    - Reactの単方向データフローの実装
+ * 5. コンポーネントの分離
+ *    - TodoInput: 入力処理
+ *    - TodoList: リスト表示
+ *    - TodoStats: 統計表示
+ *    - 各コンポーネントが単一の責任を持つ
  *
- * 6. レスポンシブデザイン
- *    - max-w-mdでモバイルファーストのデザイン
- *    - TailwindCSSによる効率的なスタイリング
- *    - iOS風のクリーンなデザイン
+ * 6. 初心者にとってのメリット
+ *    - すべてのロジックが一つのファイルに集約
+ *    - データの流れが追いやすい
+ *    - デバッグしやすい
+ *    - 段階的に理解を深められる
  */
