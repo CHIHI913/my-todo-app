@@ -1,22 +1,5 @@
-/**
- * TodoList.tsx - TODOリスト表示コンポーネント
- *
- * このコンポーネントの役割：
- * - TODOの配列を受け取って、それらを一覧表示する
- * - TODOがない場合の表示を管理する
- * - 各TODOアイテムにイベント処理関数を渡す
- *
- * このファイルで学べる概念：
- * - 配列のマップ処理（map関数）
- * - 条件付きレンダリング（三項演算子）
- * - コンポーネントの合成（複数のコンポーネントを組み合わせる）
- * - プロップスドリリング（親から子へのデータ受け渡し）
- */
-
 import { Todo } from "@/types/todo";
-import TodoItem from "./TodoItem";
 
-// このコンポーネントが受け取るpropsの型定義
 interface TodoListProps {
   todos: Todo[];
   onToggleTodo: (id: number) => void;
@@ -34,12 +17,71 @@ export default function TodoList({
   onToggleTodo,
   onDeleteTodo,
 }: TodoListProps) {
-  // Early Return パターン：条件に応じて早期リターンする
+  /**
+   * 個別のTODOアイテムを表示する内部コンポーネント
+   * @param todo - 表示するTODOアイテムのデータ
+   */
+  const TodoItem = ({ todo }: { todo: Todo }) => (
+    <div className="px-4 py-3 flex items-center gap-3 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+      <button
+        onClick={() => onToggleTodo(todo.id)}
+        className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+          todo.completed
+            ? "bg-blue-500 border-blue-500"
+            : "border-gray-300 hover:border-gray-400"
+        }`}
+      >
+        {todo.completed && (
+          <svg
+            className="w-3 h-3 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={3}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        )}
+      </button>
+
+      <span
+        className={`flex-1 text-base leading-relaxed ${
+          todo.completed ? "line-through text-gray-400" : "text-black"
+        }`}
+      >
+        {todo.text}
+      </span>
+
+      <button
+        onClick={() => onDeleteTodo(todo.id)}
+        className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+
   // TODOが一つもない場合の表示
   if (todos.length === 0) {
     return (
       <div className="p-8 text-center">
-        <div className="text-gray-400 text-base">リマインダーなし</div>
+        <div className="text-gray-400 text-base">リマインダーがありません</div>
       </div>
     );
   }
@@ -47,56 +89,23 @@ export default function TodoList({
   // TODOがある場合の表示
   return (
     <div className="divide-y divide-gray-100">
-      {/* 
-        map関数を使った配列のレンダリング
-        
-        map関数：
-        - 配列の各要素に対して処理を実行
-        - 新しい配列を作成して返す
-        - Reactでは配列をJSX要素に変換するためによく使用される
-        
-        keyプロパティ：
-        - Reactが各要素を識別するために必要
-        - 要素の追加・削除・並び替えを効率的に処理
-        - ユニークな値を指定する必要がある
-      */}
       {todos.map((todo) => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-          onToggle={onToggleTodo}
-          onDelete={onDeleteTodo}
-        />
+        <TodoItem key={todo.id} todo={todo} />
       ))}
     </div>
   );
 }
 
 /**
- * このコンポーネントのポイント：
+ * TodoList.tsx - TODOリスト表示コンポーネント
  *
- * 1. 条件付きレンダリングのパターン
- *    - Early Return: 条件に応じて早期にreturnする
- *    - コードの可読性が向上
- *    - ネストが深くなることを防ぐ
+ * このコンポーネントの役割：
+ * - TODOの配列を受け取って、それらを一覧表示する
+ * - 各TODOアイテムの表示と操作を管理する
+ * - TODOがない場合の表示を管理する
  *
- * 2. 配列のレンダリング
- *    - map関数を使って配列をJSX要素に変換
- *    - keyプロパティでReactの仮想DOMを最適化
- *    - 動的なリスト表示の基本パターン
- *
- * 3. プロップスドリリング
- *    - 親から受け取った関数を子コンポーネントに渡す
- *    - データの流れを明確にする
- *    - 責任の分離を実現
- *
- * 4. コンポーネントの合成
- *    - TodoItemコンポーネントを再利用
- *    - 単一責任の原則に従った設計
- *    - メンテナンス性の向上
- *
- * 5. ユーザーエクスペリエンス
- *    - 空の状態（Empty State）の適切な表示
- *    - ユーザーに分かりやすいメッセージ
- *    - 視覚的な境界線で項目を区別
+ * このファイルで学べる概念：
+ * - 配列のマップ処理（map関数）
+ * - 条件付きレンダリング（三項演算子）
+ * - コンポーネントの内部分割（内部関数コンポーネント）
  */

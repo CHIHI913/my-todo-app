@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Todo } from "@/types/todo";
 import TodoInput from "@/components/TodoInput";
 import TodoList from "@/components/TodoList";
-import TodoStats from "@/components/TodoStats";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -12,29 +11,27 @@ export default function Home() {
   const addTodo = (text: string) => {
     if (text.trim() === "") return;
 
-    const newTodo: Todo = {
-      id: Date.now(),
-      text: text.trim(),
-      completed: false,
-    };
-
-    setTodos((prevTodos) => [...prevTodos, newTodo]);
+    setTodos((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: text.trim(),
+        completed: false,
+      },
+    ]);
   };
 
   const toggleTodo = (id: number) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
+    setTodos((prev) =>
+      prev.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
   };
 
   const deleteTodo = (id: number) => {
-    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
-
-  const totalTodos = todos.length;
-  const remainingTodos = todos.filter((todo) => !todo.completed).length;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -53,7 +50,6 @@ export default function Home() {
           onToggleTodo={toggleTodo}
           onDeleteTodo={deleteTodo}
         />
-        <TodoStats remaining={remainingTodos} total={totalTodos} />
       </div>
 
       <div className="h-20"></div>
