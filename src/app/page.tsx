@@ -1,103 +1,145 @@
-import Image from "next/image";
+/**
+ * page.tsx - TODOアプリのメインページ
+ *
+ * Next.jsのApp Routerにおけるページファイル：
+ * - src/app/page.tsx は ルート（/）のページを表す
+ * - このファイルがブラウザでアクセスした時に最初に表示される
+ * - Next.jsは自動的にこのファイルをルートとして認識する
+ *
+ * このファイルで学べる概念：
+ * - 'use client' ディレクティブ
+ * - カスタムフックの使用
+ * - コンポーネントの組み合わせ
+ * -状態管理と表示の分離
+ */
 
+"use client"; // Next.jsのクライアントコンポーネントとして動作させるためのディレクティブ
+
+// 必要なモジュールをインポート
+import { useTodos } from "@/hooks/useTodos"; // 自作のカスタムフック
+import TodoInput from "@/components/TodoInput"; // 入力コンポーネント
+import TodoList from "@/components/TodoList"; // リスト表示コンポーネント
+import TodoStats from "@/components/TodoStats"; // 統計情報コンポーネント
+
+/**
+ * メインページコンポーネント
+ *
+ * このコンポーネントの役割：
+ * - アプリケーション全体のレイアウトを定義
+ * - 各子コンポーネントを組み合わせて完全なTODOアプリを構成
+ * - カスタムフックから状態と関数を取得
+ * - 各子コンポーネントに適切なpropsを渡す
+ */
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // カスタムフック（useTodos）から状態と操作関数を取得
+  // 分割代入（デストラクチャリング）を使用して必要な値を取り出す
+  const { todos, addTodo, toggleTodo, deleteTodo, stats } = useTodos();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // JSXを返す（アプリの見た目を定義）
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* 
+        ヘッダー部分
+        
+        iOS風のシンプルなヘッダーデザイン：
+        - 白い背景
+        - 下部に薄いグレーの境界線
+        - 中央に大きなタイトル
+      */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-md mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-black text-center">
+            リマインダー
+          </h1>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* 
+        メインコンテンツエリア
+        
+        デザインのポイント：
+        - 中央寄せで最大幅を制限（max-w-md）
+        - 白い背景のカード風デザイン
+        - 角丸（rounded-xl）と影（shadow-sm）
+        - overflow-hiddenで角丸の内側をクリップ
+      */}
+      <div className="max-w-md mx-auto bg-white mt-8 rounded-xl shadow-sm overflow-hidden">
+        {/* 
+          新しいリマインダー追加エリア
+          
+          TodoInputコンポーネントに以下を渡す：
+          - onAddTodo: TODOを追加するための関数
+        */}
+        <TodoInput onAddTodo={addTodo} />
+
+        {/* 
+          TODOリスト表示エリア
+          
+          TodoListコンポーネントに以下を渡す：
+          - todos: 現在のTODOリスト（配列）
+          - onToggleTodo: 完了状態を切り替える関数
+          - onDeleteTodo: TODOを削除する関数
+        */}
+        <TodoList
+          todos={todos}
+          onToggleTodo={toggleTodo}
+          onDeleteTodo={deleteTodo}
+        />
+
+        {/* 
+          統計情報表示エリア
+          
+          TodoStatsコンポーネントに以下を渡す：
+          - remaining: 未完了のTODO数
+          - total: 全体のTODO数
+          
+          注意：statsオブジェクトから必要な値を取り出して渡している
+        */}
+        <TodoStats remaining={stats.remaining} total={stats.total} />
+      </div>
+
+      {/* 
+        下部の余白
+        
+        ページの最下部に余白を追加：
+        - スクロール時の見た目を改善
+        - モバイルでの操作しやすさを向上
+      */}
+      <div className="h-20"></div>
     </div>
   );
 }
+
+/**
+ * このページコンポーネントのポイント：
+ *
+ * 1. App Routerの活用
+ *    - Next.js 13+の新しいルーティングシステム
+ *    - ファイルベースルーティング
+ *    - page.tsxが自動的にルートページになる
+ *
+ * 2. 'use client' ディレクティブ
+ *    - このコンポーネントがブラウザで実行されることを指定
+ *    - useState、useEffectなどのReactフックを使用する場合に必要
+ *    - サーバーサイドレンダリングとクライアントサイドレンダリングの制御
+ *
+ * 3. カスタムフックの活用
+ *    - ビジネスロジックを分離
+ *    - UIコンポーネントをシンプルに保つ
+ *    - 再利用性とテスタビリティの向上
+ *
+ * 4. コンポーネント合成パターン
+ *    - 小さなコンポーネントを組み合わせて大きな機能を作る
+ *    - 単一責任の原則に従った設計
+ *    - メンテナンス性とデバッグの容易さ
+ *
+ * 5. プロップスの受け渡し
+ *    - 親コンポーネントから子コンポーネントへのデータの流れ
+ *    - 関数をpropsとして渡すことでイベント処理を実現
+ *    - Reactの単方向データフローの実装
+ *
+ * 6. レスポンシブデザイン
+ *    - max-w-mdでモバイルファーストのデザイン
+ *    - TailwindCSSによる効率的なスタイリング
+ *    - iOS風のクリーンなデザイン
+ */
