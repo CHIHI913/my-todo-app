@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Todo } from "@/types/todo";
+import { fetchTodos } from "@/lib/api";
 import TodoInput from "@/components/TodoInput";
 import TodoList from "@/components/TodoList";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Todoの読み込み
+  useEffect(() => {
+    loadTodos();
+  }, []);
+
+  const loadTodos = async () => {
+    try {
+      setLoading(true);
+      const fetchedTodos = await fetchTodos();
+      setTodos(fetchedTodos);
+    } catch (err) {
+      setError("リマインダーの読み込みに失敗しました");
+      console.error("Failed to load todos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addTodo = (text: string) => {
     if (text.trim() === "") return;
@@ -33,6 +54,14 @@ export default function Home() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-gray-500">読み込み中...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-white border-b border-gray-200">
@@ -42,6 +71,18 @@ export default function Home() {
           </h1>
         </div>
       </div>
+
+      {error && (
+        <div className="max-w-md mx-auto mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+          <button
+            onClick={() => setError(null)}
+            className="ml-2 text-red-500 hover:text-red-700"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <div className="max-w-md mx-auto bg-white mt-8 rounded-xl shadow-sm overflow-hidden">
         <TodoInput onAddTodo={addTodo} />
@@ -62,8 +103,9 @@ export default function Home() {
  *
  * 1. 状態管理（useState）
  *    - todos: TODOリストの全てのアイテムを保存
+ *    - loading: データ取得中の状態を管理
+ *    - error: エラー発生時のメッセージを保存
  *    - 状態が変更されると自動的にUIが再レンダリングされる
- *    - Todo型の配列として管理
  *
  * 2. CRUD操作（Create, Read, Update, Delete）
  *    - addTodo: 新しいタスクを追加（Create）
